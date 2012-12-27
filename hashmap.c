@@ -1,7 +1,6 @@
 
 #include <stdlib.h>
-#include <stdio.h>
-
+#include <stddef.h>
 #include "hashmap.h"
 
 static Hashmap_Item create_item(void *key, void *value)
@@ -14,12 +13,15 @@ static Hashmap_Item create_item(void *key, void *value)
 
 static int hash(Hashmap hm, void * ptr)
 {
-	return (int) (((long) ptr) % HASHMAP_BUCKETS);
+	return (int) (((long) ptr) % hm->size);
 }
 
-Hashmap hashmap_create()
+Hashmap hashmap_create(size_t size)
 {
-	return (Hashmap) malloc(sizeof(struct hashmap));
+	Hashmap hm = (Hashmap) malloc(sizeof(struct hashmap));
+	hm->buckets = calloc(size, sizeof(Hashmap_Item));
+	hm->size = size;
+	return hm;
 }
 
 void * hashmap_get(Hashmap hm, void *key)
@@ -61,7 +63,7 @@ void hashmap_each(Hashmap hm, void fn(void *, void *, int))
 	int i;
 	Hashmap_Item item;
 
-	for (i = 0; i < HASHMAP_BUCKETS; i++) {
+	for (i = 0; i < hm->size; i++) {
 		for (item = hm->buckets[i]; item != NULL; item = item->next) {
 			(*fn)(item->value, item->key, i);
 		}
@@ -100,7 +102,7 @@ void hashmap_free(Hashmap hm)
 	int i;
 	Hashmap_Item item, next;
 
-	for (i = 0; i < HASHMAP_BUCKETS; i++) {
+	for (i = 0; i < hm->size; i++) {
 		for (item = hm->buckets[i]; item != NULL;) {
 			next = item->next;
 			free(item);

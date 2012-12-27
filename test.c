@@ -21,7 +21,7 @@ int main(void)
 	Hashmap hm;
 	char * ret;
 
-	hm = hashmap_create();
+	hm = hashmap_create(10);
 
 	hashmap_set(hm, key, "bar");
 	hashmap_set(hm, key2, "bar 2");
