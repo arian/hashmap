@@ -13,6 +13,7 @@ struct hashmap_item {
 struct hashmap {
 	Hashmap_Item * buckets;
 	size_t size;
+	size_t count;
 };
 
 typedef struct hashmap *Hashmap;

@@ -22,7 +22,7 @@ int main(void)
 	char *key5 = "hey 3";
 	char *key6 = "hey 9";
 
-	hm = hashmap_create(10);
+	hm = hashmap_create(2);
 
 	hashmap_set(hm, key, "bar");
 	hashmap_set(hm, key2, "bar 2");

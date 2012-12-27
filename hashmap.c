@@ -16,11 +16,37 @@ static int hash(Hashmap hm, void * ptr)
 	return (int) (((long) ptr) % hm->size);
 }
 
+static void rehash(Hashmap hm)
+{
+	Hashmap_Item * current, * buckets;
+	Hashmap_Item item, next;
+	size_t s;
+	int i, index;
+
+	current = hm->buckets;
+	s = hm->size;
+	hm->size <<= 1;
+
+	buckets = calloc(hm->size, sizeof(Hashmap_Item));
+
+	for (i = 0; i < s; i++) {
+		for (item = current[i]; item != NULL; item = next) {
+			index = hash(hm, item->key);
+			next = item->next;
+			item->next = buckets[index];
+			buckets[index] = item;
+		}
+	}
+	free(hm->buckets);
+	hm->buckets = buckets;
+}
+
 Hashmap hashmap_create(size_t size)
 {
 	Hashmap hm = (Hashmap) malloc(sizeof(struct hashmap));
 	hm->buckets = calloc(size, sizeof(Hashmap_Item));
 	hm->size = size;
+	hm->count = 0;
 	return hm;
 }
 
@@ -40,22 +66,24 @@ void * hashmap_get(Hashmap hm, void *key)
 void hashmap_set(Hashmap hm, void *key, void *value)
 {
 	Hashmap_Item item;
+	Hashmap_Item * p;
 	int index = hash(hm, key);
 
-	for (item = hm->buckets[index]; item != NULL;) {
+	p = &(hm->buckets[index]);
+
+	for (item = *p; item != NULL; item = item->next) {
 		if (item->key == key) {/* key already exists */
 			item->value = value;
 			return;
 		}
-		if (item->next == NULL) { /* last element in this bucket */
-			item->next = create_item(key, value);
-			return;
-		}
-		item = item->next;
 	}
 
-	/* bucket is empty */
-	hm->buckets[index] = create_item(key, value);
+	item = *p;
+	(*p) = create_item(key, value);
+	(*p)->next = item;
+
+	if (++hm->count >= hm->size * 3 / 4)
+		rehash(hm);
 }
 
 void hashmap_each(Hashmap hm, void fn(void *, void *, int))
@@ -83,6 +111,7 @@ void hashmap_delete(Hashmap hm, void * key)
 	if (item->next == NULL) {
 		free(item);
 		hm->buckets[index] = NULL;
+		hm->count--;
 		return;
 	}
 
@@ -90,6 +119,7 @@ void hashmap_delete(Hashmap hm, void * key)
 		next = item->next;
 		if (next != NULL && next->key == key) {
 			item->next = next->next;
+			hm->count--;
 			free(next);
 			return;
 		}
