@@ -68,6 +68,33 @@ void hashmap_each(Hashmap hm, void fn(void *, void *, int))
 	}
 }
 
+void hashmap_delete(Hashmap hm, void * key)
+{
+	int index = hash(hm, key);
+	Hashmap_Item item, next;
+
+	item = hm->buckets[index];
+
+	if (item == NULL)
+		return;
+
+	if (item->next == NULL) {
+		free(item);
+		hm->buckets[index] = NULL;
+		return;
+	}
+
+	while (item != NULL) {
+		next = item->next;
+		if (next != NULL && next->key == key) {
+			item->next = next->next;
+			free(next);
+			return;
+		}
+		item = next;
+	}
+}
+
 void hashmap_free(Hashmap hm)
 {
 	int i;

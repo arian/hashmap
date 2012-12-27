@@ -6,7 +6,7 @@
 
 void loop(void * value, void * key, int k)
 {
-	printf("%s - %s %d\n", (char *) value, (char *) key, k);
+	printf("(%d) %s - %s\n", k, (char *) value, (char *) key);
 }
 
 int main(void)
@@ -29,6 +29,14 @@ int main(void)
 	hashmap_set(hm, key4, "bar 2");
 	hashmap_set(hm, key5, "bar 2");
 	hashmap_set(hm, key6, "bar 2");
+
+	hashmap_each(hm, loop);
+	printf("\n");
+
+	hashmap_delete(hm, key3);
+	hashmap_delete(hm, key4);
+	hashmap_delete(hm, key5);
+	hashmap_delete(hm, key6);
 
 	ret = hashmap_get(hm, key);
 	hashmap_each(hm, loop);

@@ -22,6 +22,7 @@ Hashmap hashmap_create();
 void * hashmap_get(Hashmap, void *);
 void hashmap_set(Hashmap, void *, void *);
 void hashmap_each(Hashmap, void fn(void *, void *, int));
+void hashmap_delete(Hashmap, void *);
 void hashmap_free(Hashmap);
 
 #endif
