@@ -11,34 +11,36 @@ static Hashmap_Item create_item(void *key, void *value)
 	return item;
 }
 
-static int hash(Hashmap hm, void * ptr)
+static int hash(void * ptr, int size)
 {
-	return (int) (((long) ptr) % hm->size);
+	return (int) (((long) ptr) % size);
 }
 
 static void rehash(Hashmap hm)
 {
 	Hashmap_Item * current, * buckets;
 	Hashmap_Item item, next;
-	size_t s;
+	size_t s, size;
 	int i, index;
 
 	current = hm->buckets;
 	s = hm->size;
-	hm->size <<= 1;
+	size = s << 1;
 
-	buckets = calloc(hm->size, sizeof(Hashmap_Item));
+	buckets = calloc(size, sizeof(Hashmap_Item));
 
 	for (i = 0; i < s; i++) {
 		for (item = current[i]; item != NULL; item = next) {
-			index = hash(hm, item->key);
+			index = hash(item->key, size);
 			next = item->next;
 			item->next = buckets[index];
 			buckets[index] = item;
 		}
 	}
+
 	free(hm->buckets);
 	hm->buckets = buckets;
+	hm->size = size;
 }
 
 Hashmap hashmap_create(size_t size)
@@ -52,7 +54,7 @@ Hashmap hashmap_create(size_t size)
 
 void * hashmap_get(Hashmap hm, void *key)
 {
-	int index = hash(hm, key);
+	int index = hash(key, hm->size);
 	Hashmap_Item item;
 
 	for (item = hm->buckets[index]; item != NULL; item = item->next) {
@@ -67,7 +69,7 @@ void hashmap_set(Hashmap hm, void *key, void *value)
 {
 	Hashmap_Item item;
 	Hashmap_Item * p;
-	int index = hash(hm, key);
+	int index = hash(key, hm->size);
 
 	p = &(hm->buckets[index]);
 
@@ -100,7 +102,7 @@ void hashmap_each(Hashmap hm, void fn(void *, void *, int))
 
 void hashmap_delete(Hashmap hm, void * key)
 {
-	int index = hash(hm, key);
+	int index = hash(key, hm->size);
 	Hashmap_Item item, next;
 
 	item = hm->buckets[index];
