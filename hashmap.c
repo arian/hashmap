@@ -110,5 +110,6 @@ void hashmap_free(Hashmap hm)
 		}
 	}
 
+	free(hm->buckets);
 	free(hm);
 }

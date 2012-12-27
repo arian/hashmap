@@ -12,14 +12,15 @@ void loop(void * value, void * key, int k)
 int main(void)
 {
 
+	Hashmap hm;
+	char * ret;
+
 	char *key = "hello";
 	char *key2 = "hey";
 	char *key3 = "hey 1";
 	char *key4 = "hey 2";
 	char *key5 = "hey 3";
 	char *key6 = "hey 9";
-	Hashmap hm;
-	char * ret;
 
 	hm = hashmap_create(10);
 
@@ -43,10 +44,8 @@ int main(void)
 
 	hashmap_free(hm);
 
-	if (ret == NULL)
-		printf("ret is null\n");
-	else
-		printf("%s\n", ret);
+	assert(ret != NULL);
+	printf("%s\n", ret);
 
 	return 0;
 }
